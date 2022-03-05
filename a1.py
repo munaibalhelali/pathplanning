@@ -1,21 +1,20 @@
 import numpy as np
-start = np.array([0, 0])
-goal = np.array([4, 9])
-grid = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],  # Row 0
-                 [0, 1, 1, 0, 0, 0, 0, 1, 0, 0],  # Row 1
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 2
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 3
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 4
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 5
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 6
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 7
-                 [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 8
-                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]) # Row 9
-        # Columns 0  1  2  3  4  5  6  7  8  9
+import json
+# start = np.array([0, 0])
+# goal = np.array([4, 9])
+# grid = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],  # Row 0
+#                  [0, 1, 1, 0, 0, 0, 0, 1, 0, 0],  # Row 1
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 2
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 3
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 4
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 5
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 6
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 7
+#                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 8
+#                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]) # Row 9
+#         # Columns 0  1  2  3  4  5  6  7  8  9
 
-# Copies of grid to be used for visualizing results.
-path = np.zeros([len(grid), len(grid)], dtype=int)
-best_path = np.zeros([len(grid), len(grid)], dtype=int)
+
 
 
 class BreadthFirstSearch:
@@ -102,50 +101,62 @@ class BreadthFirstSearch:
     def string_to_array(self, string):
         array = [int(string[1]), int(string[3])]
         return np.array(array)
+def main(start, goal, grid):
+    # Init
+    bfs = BreadthFirstSearch(start, goal, grid, path)
+
+    while True:
+        # Determine next possible moves.
+        bfs.get_possible_moves()
+        if bfs.goal_found():
+            break
+        if not bfs.explore_next_move():
+            print('Could not find a path!')
+            break
 
 
-# Init
-bfs = BreadthFirstSearch(start, goal, grid, path)
-
-while True:
-    # Determine next possible moves.
-    bfs.get_possible_moves()
-    if bfs.goal_found():
-        break
-    if not bfs.explore_next_move():
-        print('Could not find a path!')
-        break
+    print('')
+    print('Explored Path')
+    print('-------------')
+    print(path)
+    print('')
+    print('Fully explored count ' + str(np.count_nonzero(path)))
 
 
-print('')
-print('Explored Path')
-print('-------------')
-print(path)
-print('')
-print('Fully explored count ' + str(np.count_nonzero(path)))
+    def find_best_path(pos):
+        best_path[pos[0], pos[1]] = 1
+        h_pos = path[pos[0], pos[1]]
+        if h_pos == 1:
+            return 1
+
+        potential_moves = bfs.generate_potential_moves(pos)
+        for move in potential_moves:
+            if not bfs.valid_move(move):
+                continue
+            h_move = path[move[0], move[1]]
+            if h_move == (h_pos - 1):
+                return find_best_path(move) + 1
 
 
-def find_best_path(pos):
-    best_path[pos[0], pos[1]] = 1
-    h_pos = path[pos[0], pos[1]]
-    if h_pos == 1:
-        return 1
+    goal_count = find_best_path(goal)
+    best_path[start[0], start[1]] = 99
+    print('')
+    print('Best Path To Goal')
+    print('-----------------')
+    print(best_path)
+    print('')
+    print('Moves to Goal: ' + str(goal_count))
+    print('')
 
-    potential_moves = bfs.generate_potential_moves(pos)
-    for move in potential_moves:
-        if not bfs.valid_move(move):
-            continue
-        h_move = path[move[0], move[1]]
-        if h_move == (h_pos - 1):
-            return find_best_path(move) + 1
-
-
-goal_count = find_best_path(goal)
-best_path[start[0], start[1]] = 99
-print('')
-print('Best Path To Goal')
-print('-----------------')
-print(best_path)
-print('')
-print('Moves to Goal: ' + str(goal_count))
-print('')
+if __name__ == "__main__":
+    with open("starting_states.json", 'r') as in_f:
+        starting_states = json.load(in_f)
+    for i, state in enumerate(starting_states):
+        start = np.array(state['start'])
+        goal = np.array(state['goal'])
+        grid = np.array(state['grid'])
+        # Copies of grid to be used for visualizing results.
+        path = np.zeros([len(grid), len(grid)], dtype=int)
+        best_path = np.zeros([len(grid), len(grid)], dtype=int)
+        print(f'Case {i}:')
+        main(start, goal, grid)
