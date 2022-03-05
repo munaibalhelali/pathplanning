@@ -38,9 +38,8 @@ class BreadthFirstSearch:
             if not self.valid_move(move):
                 continue
             # Check if move has already been explored.
-            if str(move) in self.explored.keys():
-                continue
-            self.not_explored[str(move)] = self.pos_depth+1
+            if (str(move) not in self.explored) and (str(move) not in self.not_explored):
+                self.not_explored[str(move)] = self.pos_depth+1
         # Since all next possible moves have been determined,
         # consider current location explored.
         self.explored[self.pos_str] = self.pos_depth
@@ -84,7 +83,7 @@ class BreadthFirstSearch:
 
         potential_moves = [pos + u, pos + d, pos + l, pos + r]
         # Students, uncomment the line below,  what happens?
-        #potential_moves += [pos + u+r, pos + u+l, pos + d+r, pos + d+l]
+        potential_moves += [pos + u+r, pos + u+l, pos + d+r, pos + d+l]
         return potential_moves
 
     def valid_move(self, move):
@@ -160,3 +159,4 @@ if __name__ == "__main__":
         best_path = np.zeros([len(grid), len(grid)], dtype=int)
         print(f'Case {i}:')
         main(start, goal, grid)
+        break
