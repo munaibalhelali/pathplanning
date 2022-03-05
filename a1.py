@@ -1,6 +1,6 @@
 import numpy as np
 start = np.array([0, 0])
-goal = np.array([5, 9])
+goal = np.array([4, 9])
 grid = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0, 0],  # Row 0
                  [0, 1, 1, 0, 0, 0, 0, 1, 0, 0],  # Row 1
                  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Row 2
@@ -39,15 +39,19 @@ class BreadthFirstSearch:
             if not self.valid_move(move):
                 continue
             # Check if move has already been explored.
-
+            if str(move) in self.explored.keys():
+                continue
+            self.not_explored[str(move)] = self.pos_depth+1
         # Since all next possible moves have been determined,
         # consider current location explored.
+        self.explored[self.pos_str] = self.pos_depth
 
         return True
 
     def goal_found(self):
-        if True:
+        if self.goal_str == self.pos_str:
             # Add goal to path.
+            self.path[self.pos[0], self.pos[1]] = self.pos_depth
             return True
         return False
 
@@ -56,12 +60,9 @@ class BreadthFirstSearch:
         sorted_not_explored = sorted(
             self.not_explored,
             key=self.not_explored.get,
-            reverse=False)
-
-        # Determine the pos and depth of next move.
-
-        # Write depth of next move onto path.
-
+            reverse=False)best_path
+        self.path[self.pos[0], self.pos[1]] = self.pos_depth
+        self.not_explored.pop(self.pos_str)
         return True
 
     # END - Student Section
@@ -103,7 +104,9 @@ while True:
     bfs.get_possible_moves()
     if bfs.goal_found():
         break
-    bfs.explore_next_move()
+    if not bfs.explore_next_move():
+        print('Could not find a path!')
+        break
 
 
 print('')
