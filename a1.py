@@ -49,8 +49,10 @@ class BreadthFirstSearch:
         return True
 
     def goal_found(self):
-        if self.goal_str == self.pos_str:
+        if self.goal_str in self.not_explored:
             # Add goal to path.
+            self.pos = self.string_to_array(self.goal_str)
+            self.pos_depth = self.not_explored.pop(self.goal_str)
             self.path[self.pos[0], self.pos[1]] = self.pos_depth
             return True
         return False
@@ -60,9 +62,15 @@ class BreadthFirstSearch:
         sorted_not_explored = sorted(
             self.not_explored,
             key=self.not_explored.get,
-            reverse=False)best_path
+            reverse=False)
+        if len(sorted_not_explored) == 0:
+            return False
+        # Determine the pos and depth of next move.
+        self.pos_str = sorted_not_explored[0]
+        self.pos = self.string_to_array(self.pos_str)
+        self.pos_depth = self.not_explored.pop(self.pos_str)
+        # Write depth of next move onto path.
         self.path[self.pos[0], self.pos[1]] = self.pos_depth
-        self.not_explored.pop(self.pos_str)
         return True
 
     # END - Student Section
