@@ -1,4 +1,6 @@
 import numpy as np
+import math 
+
 class Intersection:
     def __init__(self, position, name):
         self.position = position
@@ -65,34 +67,48 @@ class AStarSearch:
     def get_possible_moves(self):
         # Iterate through connections and add applicable to not_explored.
         for connection in self.location.connections:
-            if connection not in {} and connection not in {}:
-                # self.length_depth
-                # self.road_distance(self.location, connection)
-                # self.intersection_cost(connection)
-                # self.heuristic(connection)
+            if connection in self.not_explored:
+                h_current = self.not_explored[connection]
+                distance = self.road_distance(self.location, connection)
+                h_new = self.length_depth + distance
+                h_new += self.intersection_cost(connection)
+                h_new += self.heuristic(connection)
+                if h_new < h_current:
+                    print('Heuristic Changed from '+ str(h_current)+ ' to '+ str(h_new))
+                    self.not_explored[connection] = h_new
+                    connection.arrived_by = self.location
+
+            if connection not in self.explored and connection not in self.not_explored:
+                hP = self.length_depth + self.road_distance(self.location, connection) + self.intersection_cost(connection)+ self.heuristic(connection)
+                
+                self.not_explored[connection] = hP
+                
                 
                 # Save direction arrived by to allow to track turn direction.
                 connection.arrived_by = self.location
 
         # Add current position to explored set value to 
-        # self.length_depth + self.heuristic(self.location)
+        self.explored[self.location] = self.length_depth + self.heuristic(self.location)
 
     def goal_found(self):
-        if True:
+        if self.goal in self.explored :
             return True
         return False
 
     def explore_next_move(self):
         # Determine next move to explore.
-
+        sorted_not_explored = sorted(self.not_explored,
+                                    key=self.not_explored.get,
+                                    reverse=False)
         # Determine the pos and depth of next move.
-        # self.direction_update(sorted_not_explored[0])
-        # self.location = 
-        # self.length_depth =
+        self.direction_update(sorted_not_explored[0])
+        self.location = sorted_not_explored[0]
+        self.length_depth = self.not_explored.pop(self.location) - self.heuristic(self.location)
         return True
 
     def heuristic(self, connection):
-        return round(np.sqrt(1), 1)
+        distance = math.dist(connection.position, self.goal.position)
+        return round(distance, 1)
 
     def road_distance(self, int1, int2):
         distance = abs(int1.position[0] - int2.position[0])
